@@ -15,38 +15,56 @@ from routeplex import RoutePlex
 
 client = RoutePlex(api_key="rp_your_api_key")
 
-# Simple — one-liner
+# Auto-routing — analyzes your prompt, picks the best model
 response = client.chat("Explain quantum computing")
 print(response.output)
-
-# With strategy
-response = client.chat("Write a Python sorting function", strategy="quality")
 print(f"Model: {response.model_used}")
 print(f"Cost: ${response.usage.cost_usd:.6f}")
+
+# Or override with a strategy
+response = client.chat("Write a Python sorting function", strategy="quality")
 ```
 
 ## Features
 
 - **One-liner chat** — pass a string, get a response
-- **Smart routing** — auto-select the best model with `strategy="cost|speed|quality|balanced"`
+- **Prompt-based auto-routing** — RoutePlex analyzes your prompt and picks the best model automatically
+- **Strategy routing** — override with `strategy="cost|speed|quality|balanced"` when you know what you want
 - **Manual mode** — pick a specific model with `model="gpt-4o-mini"`
 - **Cost estimation** — free, no API key needed
 - **Prompt enhancement** — improve prompts before sending
 - **Typed errors** — `AuthenticationError`, `RateLimitError`, `ValidationError`, etc.
 - **Zero dependencies** — uses only Python stdlib (`urllib`, `json`)
 
-## Usage
+## Routing Modes
 
-### Auto-routing (RoutePlex AI)
+RoutePlex supports three ways to route your requests:
+
+### 1. Auto-routing (default) — analyzes your prompt
+
+When you don't specify a model or strategy, RoutePlex **analyzes your prompt** to determine the best model. A simple question gets a fast, cheap model. A complex reasoning task gets a capable one.
 
 ```python
-# Let RoutePlex pick the best model
-response = client.chat("What is Python?")
+# RoutePlex reads your prompt and picks the optimal model
+response = client.chat("What is Python?")           # → fast, cheap model
+response = client.chat("Prove the Riemann hypothesis approach")  # → powerful model
+```
 
-# Or specify a strategy
-response = client.chat("Write a haiku", strategy="speed")
-response = client.chat("Analyze this data", strategy="quality")
-response = client.chat("Summarize this article", strategy="cost")
+### 2. Strategy routing — you choose the priority
+
+When you specify a strategy, RoutePlex picks the best model for that priority — regardless of prompt content.
+
+```python
+response = client.chat("Write a haiku", strategy="speed")      # fastest model
+response = client.chat("Analyze this data", strategy="quality") # most capable model
+response = client.chat("Summarize this article", strategy="cost") # cheapest model
+response = client.chat("General task", strategy="balanced")     # cost/speed/quality tradeoff
+```
+
+### 3. Manual mode — you pick the model
+
+```python
+response = client.chat("Explain recursion", model="gpt-4o-mini")
 ```
 
 ### Manual model selection
