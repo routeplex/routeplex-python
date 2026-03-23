@@ -80,13 +80,23 @@ class RoutePlex:
     ) -> ChatResponse:
         """Create a chat completion.
 
+        RoutePlex supports three routing modes:
+
+        - **Auto-routing** (default): omit both ``model`` and ``strategy`` —
+          RoutePlex analyzes your prompt and picks the best model automatically.
+        - **Strategy routing**: set ``strategy`` to ``"cost"``, ``"speed"``,
+          ``"quality"``, or ``"balanced"`` to override auto-routing with a
+          fixed priority.
+        - **Manual mode**: set ``model`` to a specific model ID.
+
         Args:
             messages: A string (shorthand for a single user message) or a list
                 of message dicts / :class:`Message` objects.
-            model: Specific model to use (e.g. ``"gpt-4o-mini"``). If omitted,
-                RoutePlex auto-routes via ``routeplex-ai``.
-            strategy: Routing strategy when auto-routing: ``"cost"``,
-                ``"speed"``, ``"quality"``, ``"balanced"``, or ``"auto"``.
+            model: Specific model to use (e.g. ``"gpt-4o-mini"``). Enables
+                manual mode — bypasses auto-routing entirely.
+            strategy: Routing priority when auto-routing: ``"cost"``,
+                ``"speed"``, ``"quality"``, ``"balanced"``. If omitted,
+                RoutePlex analyzes the prompt to pick the best model.
             max_output_tokens: Maximum output tokens (1-4096, default 512).
             temperature: Sampling temperature (0-2). None for model default.
             enhance_prompt: Auto-enhance the last user message before sending.
