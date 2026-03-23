@@ -77,6 +77,7 @@ class RoutePlex:
         max_output_tokens: int = 512,
         temperature: Optional[float] = None,
         enhance_prompt: bool = False,
+        test_mode: bool = False,
     ) -> ChatResponse:
         """Create a chat completion.
 
@@ -100,6 +101,8 @@ class RoutePlex:
             max_output_tokens: Maximum output tokens (1-4096, default 512).
             temperature: Sampling temperature (0-2). None for model default.
             enhance_prompt: Auto-enhance the last user message before sending.
+            test_mode: When True, forces routing to use only default
+                (non-premium) models regardless of account settings.
 
         Returns:
             A :class:`ChatResponse` with ``.output``, ``.usage``, etc.
@@ -110,6 +113,7 @@ class RoutePlex:
             "messages": msgs,
             "max_output_tokens": max_output_tokens,
             "enhance_prompt": enhance_prompt,
+            "test_mode": test_mode,
         }
 
         if model:
