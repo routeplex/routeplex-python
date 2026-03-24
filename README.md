@@ -24,6 +24,9 @@ response = client.chat("Explain quantum computing")
 print(response.output)
 print(f"Model: {response.model_used}")
 print(f"Cost: ${response.usage.cost_usd:.6f}")
+
+# Or override with a strategy
+response = client.chat("Write a Python sorting function", strategy="quality")
 ```
 
 ## Features
