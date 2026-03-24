@@ -164,6 +164,6 @@ class Model:
     provider: str
     tier: str
     context_window: int = 0
-    max_output: int = 0
-    status: str = "available"
+    max_output_tokens: int = 0
+    health: str = "healthy"
     raw: Dict[str, Any] = field(default_factory=dict)

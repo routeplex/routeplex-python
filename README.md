@@ -168,7 +168,8 @@ response = client.chat.completions.create(
 
 - [Website](https://routeplex.com?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Documentation](https://routeplex.com/docs?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
-- [API Reference & Playground](https://routeplex.com/docs/api-reference/playground?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [API Reference](https://routeplex.com/api-reference?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [Playground](https://routeplex.com/playground?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Pricing](https://routeplex.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Changelog](https://routeplex.com/changelog?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Blog](https://routeplex.com/blog?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
