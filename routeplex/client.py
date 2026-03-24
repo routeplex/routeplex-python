@@ -33,7 +33,7 @@ class RoutePlex:
 
         from routeplex import RoutePlex
 
-        client = RoutePlex(api_key="rp_your_key")
+        client = RoutePlex(api_key="rp_live_YOUR_KEY")
 
         # Quick one-liner
         response = client.chat("Explain quantum computing")

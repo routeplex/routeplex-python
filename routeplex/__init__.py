@@ -6,7 +6,7 @@ Route requests across OpenAI, Anthropic, and Google Gemini through a unified API
 Usage:
     from routeplex import RoutePlex
 
-    client = RoutePlex(api_key="rp_your_api_key")
+    client = RoutePlex(api_key="rp_live_YOUR_KEY")
     response = client.chat("What is Python?")
     print(response.output)
 
