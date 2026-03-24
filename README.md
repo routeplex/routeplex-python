@@ -1,6 +1,10 @@
 # RoutePlex Python SDK
 
-The official Python SDK for [RoutePlex](https://routeplex.com), the multi-model AI gateway.
+[![PyPI](https://img.shields.io/pypi/v/routeplex?label=PyPI&color=blue)](https://pypi.org/project/routeplex/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/routeplex/routeplex-python/blob/main/LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-3776ab)](https://pypi.org/project/routeplex/)
+
+The official Python SDK for [RoutePlex](https://routeplex.com?utm_source=github&utm_medium=readme&utm_campaign=python-sdk), the multi-model AI gateway. Route requests across OpenAI, Anthropic, and Google through a single API.
 
 ## Install
 
@@ -13,16 +17,13 @@ pip install routeplex
 ```python
 from routeplex import RoutePlex
 
-client = RoutePlex(api_key="rp_your_api_key")
+client = RoutePlex(api_key="rp_live_YOUR_KEY")
 
 # Auto-routing — analyzes your prompt, picks the best model
 response = client.chat("Explain quantum computing")
 print(response.output)
 print(f"Model: {response.model_used}")
 print(f"Cost: ${response.usage.cost_usd:.6f}")
-
-# Or override with a strategy
-response = client.chat("Write a Python sorting function", strategy="quality")
 ```
 
 ## Features
@@ -31,8 +32,9 @@ response = client.chat("Write a Python sorting function", strategy="quality")
 - **Prompt-based auto-routing** — RoutePlex analyzes your prompt and picks the best model automatically
 - **Strategy routing** — override with `strategy="cost|speed|quality|balanced"` when you know what you want
 - **Manual mode** — pick a specific model with `model="gpt-4o-mini"`
-- **Cost estimation** — free, no API key needed
-- **Prompt enhancement** — improve prompts before sending
+- **Prompt enhancement** — auto-improve prompts before sending to the model
+- **Test mode** — safe development and CI testing with default-tier models only
+- **Cost estimation** — estimate costs before sending (free, no API key needed)
 - **Typed errors** — `AuthenticationError`, `RateLimitError`, `ValidationError`, etc.
 - **Zero dependencies** — uses only Python stdlib (`urllib`, `json`)
 
@@ -67,16 +69,32 @@ response = client.chat("General task", strategy="balanced")     # cost/speed/qua
 response = client.chat("Explain recursion", model="gpt-4o-mini")
 ```
 
-### Manual model selection
+## Prompt Enhancement
+
+Auto-improve your prompt before it reaches the model. Stateless, free, adds no latency overhead.
 
 ```python
-response = client.chat(
-    "Explain recursion",
-    model="gpt-4o-mini",
-    max_output_tokens=1024,
-    temperature=0.5,
-)
+# Per-request enhancement
+response = client.chat("fix my code", enhance_prompt=True)
+
+# Standalone — preview the enhanced prompt (free, no API key)
+result = client.enhance("tell me about kubernetes")
+if result.changed:
+    print(f"Enhanced: {result.enhanced_prompt}")
 ```
+
+## Test Mode
+
+Use `test_mode` during development and CI to keep routing on default-tier models only — no premium charges, predictable costs.
+
+```python
+# Safe for CI pipelines — will never route to premium models
+response = client.chat("Write a unit test for this function.", test_mode=True)
+```
+
+> `test_mode` only affects auto-routing. In manual mode you pick the model explicitly, so it has no effect.
+
+## More Examples
 
 ### Multi-turn conversations
 
@@ -95,16 +113,6 @@ response = client.chat([
 estimate = client.estimate("Write a blog post about AI")
 print(f"Model: {estimate.model}")
 print(f"Estimated cost: ${estimate.estimated_cost_usd:.6f}")
-print(f"Confidence: {estimate.confidence}")
-```
-
-### Prompt enhancement (free)
-
-```python
-result = client.enhance("tell me about kubernetes")
-if result.changed:
-    print(f"Enhanced: {result.enhanced_prompt}")
-    print(f"Type: {result.query_type}")
 ```
 
 ### List models
@@ -120,8 +128,6 @@ for m in models:
 ```python
 from routeplex import RoutePlex, RateLimitError, AuthenticationError
 
-client = RoutePlex(api_key="rp_your_key")
-
 try:
     response = client.chat("Hello!")
 except AuthenticationError:
@@ -130,7 +136,7 @@ except RateLimitError as e:
     print(f"Rate limited: {e.message}")
 ```
 
-## OpenAI SDK Compatible
+## Also Works with OpenAI SDK
 
 You can also use RoutePlex with the OpenAI SDK — just change the `base_url`:
 
@@ -138,7 +144,7 @@ You can also use RoutePlex with the OpenAI SDK — just change the `base_url`:
 from openai import OpenAI
 
 client = OpenAI(
-    api_key="rp_your_api_key",
+    api_key="rp_live_YOUR_KEY",
     base_url="https://api.routeplex.com/v1",
 )
 
@@ -150,17 +156,22 @@ response = client.chat.completions.create(
 
 ## Ecosystem
 
-| Package | Platform | Description |
-|---------|----------|-------------|
-| [`routeplex`](https://pypi.org/project/routeplex/) | PyPI | Python SDK |
-| [`@routeplex/node`](https://www.npmjs.com/package/@routeplex/node) | npm | Node.js SDK |
+| Package | Platform | Install |
+|---------|----------|---------|
+| [`routeplex`](https://pypi.org/project/routeplex/) | PyPI | `pip install routeplex` |
+| [`@routeplex/node`](https://www.npmjs.com/package/@routeplex/node) | npm | `npm install @routeplex/node` |
 
 ## Links
 
-- [Website](https://routeplex.com)
-- [Documentation](https://routeplex.com/docs)
-- [API Playground](https://routeplex.com/docs/api-reference/playground)
+- [Website](https://routeplex.com?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [Documentation](https://routeplex.com/docs?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [API Reference & Playground](https://routeplex.com/docs/api-reference/playground?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [Pricing](https://routeplex.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [Changelog](https://routeplex.com/changelog?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [Blog](https://routeplex.com/blog?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [Node.js SDK (GitHub)](https://github.com/routeplex/routeplex-node)
+- [Examples](https://github.com/routeplex/routeplex-examples)
 
 ## License
 
-MIT
+MIT — see [LICENSE](https://github.com/routeplex/routeplex-python/blob/main/LICENSE)
