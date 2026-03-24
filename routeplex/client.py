@@ -25,7 +25,7 @@ class RoutePlex:
     """RoutePlex API client.
 
     Args:
-        api_key: Your RoutePlex API key (starts with ``rp_`` or ``sk_live_``).
+        api_key: Your RoutePlex API key (starts with ``rp_live_``).
         base_url: API base URL. Defaults to ``https://api.routeplex.com``.
         timeout: Request timeout in seconds. Defaults to 120.
 
@@ -237,8 +237,8 @@ class RoutePlex:
                 provider=m.get("provider", ""),
                 tier=m.get("tier", "default"),
                 context_window=m.get("context_window", 0),
-                max_output=m.get("max_output", 0),
-                status=m.get("status", "available"),
+                max_output_tokens=m.get("max_output_tokens", 0),
+                health=m.get("health", "healthy"),
                 raw=m,
             ))
         return models
