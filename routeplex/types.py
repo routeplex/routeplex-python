@@ -157,6 +157,21 @@ class EnhanceResponse:
 
 
 @dataclass(frozen=True)
+class ModelPricing:
+    """Per-token pricing for a model."""
+    input_per_1k: float
+    output_per_1k: float
+
+
+@dataclass(frozen=True)
+class ModelCapabilities:
+    """Feature support flags for a model."""
+    streaming: bool = True
+    functions: bool = False
+    vision: bool = False
+
+
+@dataclass(frozen=True)
 class Model:
     """An available model."""
     id: str
@@ -164,6 +179,11 @@ class Model:
     provider: str
     tier: str
     context_window: int = 0
-    max_output: int = 0
-    status: str = "available"
+    max_output_tokens: int = 0
+    health: str = "healthy"
+    pricing: Optional[ModelPricing] = None
+    capabilities: Optional[ModelCapabilities] = None
+    aliases: List[str] = field(default_factory=list)
+    deprecated: bool = False
+    deprecation_date: Optional[str] = None
     raw: Dict[str, Any] = field(default_factory=dict)

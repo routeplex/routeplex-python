@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Documentation
-    url: https://routeplex.com/docs
+    url: https://routeplex.com/docs?utm_source=github&utm_medium=issues&utm_campaign=python-sdk
     about: Check the docs before opening an issue
   - name: Discord Community
-    url: https://discord.gg/routeplex
+    url: https://discord.gg/BaFcXQJA
     about: Ask questions and get help from the community

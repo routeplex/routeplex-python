@@ -97,6 +97,26 @@ response = client.chat("Write a unit test for this function.", test_mode=True)
 
 > `test_mode` only affects auto-routing. In manual mode you pick the model explicitly, so it has no effect.
 
+## Streaming
+
+Stream responses in real time using `chat_stream()`. Supports two modes: `"buffered"` (default, ~100ms chunks for smooth output) and `"realtime"` (~10ms chunks for minimal latency).
+
+```python
+# Buffered streaming (default)
+for event in client.chat_stream("Explain how streaming works"):
+    if event.type == "delta":
+        print(event.content, end="", flush=True)
+    elif event.type == "done":
+        print(f"\nModel: {event.model_used} | Cost: ${event.usage['cost_usd']:.6f}")
+
+# Realtime streaming — lowest latency
+for event in client.chat_stream("Quick answer", stream_mode="realtime"):
+    if event.type == "delta":
+        print(event.content, end="", flush=True)
+```
+
+Events: `delta` (content chunk), `done` (final stats), `error` (failure).
+
 ## More Examples
 
 ### Multi-turn conversations
@@ -168,7 +188,8 @@ response = client.chat.completions.create(
 
 - [Website](https://routeplex.com?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Documentation](https://routeplex.com/docs?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
-- [API Reference & Playground](https://routeplex.com/docs/api-reference/playground?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [API Reference](https://routeplex.com/api-reference?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
+- [Playground](https://routeplex.com/playground?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Pricing](https://routeplex.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Changelog](https://routeplex.com/changelog?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)
 - [Blog](https://routeplex.com/blog?utm_source=github&utm_medium=readme&utm_campaign=python-sdk)

@@ -23,6 +23,8 @@ from routeplex.types import (
     EstimateResponse,
     EnhanceResponse,
     Model,
+    ModelPricing,
+    ModelCapabilities,
     RoutePlexError,
     AuthenticationError,
     RateLimitError,
@@ -30,15 +32,19 @@ from routeplex.types import (
     ProviderError,
     ContentPolicyError,
 )
+from routeplex.streaming import StreamEvent
 
 __all__ = [
     "RoutePlex",
     "ChatResponse",
+    "StreamEvent",
     "Message",
     "Usage",
     "EstimateResponse",
     "EnhanceResponse",
     "Model",
+    "ModelPricing",
+    "ModelCapabilities",
     "RoutePlexError",
     "AuthenticationError",
     "RateLimitError",
