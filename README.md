@@ -32,14 +32,18 @@ response = client.chat("Write a Python sorting function", strategy="quality")
 ## Features
 
 - **One-liner chat** — pass a string, get a response
+- **Streaming** — real-time SSE with `chat_stream()` in buffered (~100ms) or realtime (~10ms) mode
 - **Prompt-based auto-routing** — RoutePlex analyzes your prompt and picks the best model automatically
-- **Strategy routing** — override with `strategy="cost|speed|quality|balanced"` when you know what you want
+- **Strategy routing** — override with `strategy` (`cost`, `speed`, `quality`, `balanced`, `auto`)
 - **Manual mode** — pick a specific model with `model="gpt-4o-mini"`
 - **Prompt enhancement** — auto-improve prompts before sending to the model
 - **Test mode** — safe development and CI testing with default-tier models only
 - **Cost estimation** — estimate costs before sending (free, no API key needed)
-- **Typed errors** — `AuthenticationError`, `RateLimitError`, `ValidationError`, etc.
+- **Model catalog** — list all 30+ models with pricing, capabilities, and health status
+- **Typed errors** — `AuthenticationError`, `RateLimitError`, `ValidationError`, `ProviderError`, `ContentPolicyError`
 - **Zero dependencies** — uses only Python stdlib (`urllib`, `json`)
+
+> **Also see:** [Streaming](#streaming) · [More Examples](#more-examples) · [OpenAI SDK Compatible](#also-works-with-openai-sdk)
 
 ## Routing Modes
 
