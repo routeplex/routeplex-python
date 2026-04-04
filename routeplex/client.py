@@ -14,8 +14,11 @@ from routeplex.types import (
     EstimateResponse,
     EnhanceResponse,
     Model,
+    ModelPricing,
+    ModelCapabilities,
     _raise_for_error,
 )
+from routeplex.streaming import StreamEvent, parse_sse_line
 
 _DEFAULT_BASE_URL = "https://api.routeplex.com"
 _TIMEOUT = 120  # seconds
@@ -96,8 +99,8 @@ class RoutePlex:
             model: Specific model to use (e.g. ``"gpt-4o-mini"``). Enables
                 manual mode — bypasses auto-routing entirely.
             strategy: Routing priority when auto-routing: ``"cost"``,
-                ``"speed"``, ``"quality"``, ``"balanced"``. If omitted,
-                RoutePlex analyzes the prompt to pick the best model.
+                ``"speed"``, ``"quality"``, ``"balanced"``, or ``"auto"``
+                (prompt-based, default). If omitted, defaults to ``"auto"``.
             max_output_tokens: Maximum output tokens (1-4096, default 512).
             temperature: Sampling temperature (0-2). None for model default.
             enhance_prompt: Auto-enhance the last user message before sending.
@@ -149,6 +152,129 @@ class RoutePlex:
             enhancement=d.get("enhancement"),
             raw=data,
         )
+
+    # ------------------------------------------------------------------
+    # Streaming Chat
+    # ------------------------------------------------------------------
+
+    def chat_stream(
+        self,
+        messages: Union[str, List[Union[Dict[str, str], Message]]],
+        *,
+        model: Optional[str] = None,
+        strategy: Optional[str] = None,
+        max_output_tokens: int = 512,
+        temperature: Optional[float] = None,
+        enhance_prompt: bool = False,
+        test_mode: bool = False,
+        stream_mode: str = "buffered",
+    ):
+        """Stream a chat completion, yielding events as they arrive.
+
+        Same parameters as :meth:`chat`, plus:
+
+        Args:
+            stream_mode: ``"buffered"`` (default, smooth 50-150ms paced chunks)
+                or ``"realtime"`` (minimal ~10ms buffering).
+
+        Yields:
+            :class:`StreamEvent` objects. Collect ``delta`` events for text::
+
+                for event in client.chat_stream("Tell me a story"):
+                    if event.type == "delta":
+                        print(event.content, end="", flush=True)
+                    elif event.type == "done":
+                        print(f"\\nTokens: {event.usage['total_tokens']}")
+        """
+        msgs = self._normalize_messages(messages)
+
+        body: Dict[str, Any] = {
+            "messages": msgs,
+            "max_output_tokens": max_output_tokens,
+            "enhance_prompt": enhance_prompt,
+            "test_mode": test_mode,
+            "stream": True,
+            "stream_mode": stream_mode,
+        }
+
+        if model:
+            body["mode"] = "manual"
+            body["model"] = model
+        else:
+            body["mode"] = "routeplex-ai"
+            if strategy:
+                body["strategy"] = strategy
+
+        if temperature is not None:
+            body["temperature"] = temperature
+
+        url = f"{self._base_url}/api/v1/chat"
+        payload = json.dumps(body).encode("utf-8")
+        req = urllib.request.Request(
+            url, data=payload, headers=self._headers(auth=True), method="POST"
+        )
+
+        try:
+            resp = urllib.request.urlopen(req, timeout=self._timeout)
+        except urllib.error.HTTPError as e:
+            body_data = {}
+            try:
+                body_data = json.loads(e.read().decode("utf-8"))
+            except Exception:
+                pass
+            if body_data.get("success") is False and "error" in body_data:
+                _raise_for_error(e.code, body_data)
+            raise RoutePlexError(
+                message=f"HTTP {e.code}: {e.reason}",
+                code="http_error",
+                status=e.code,
+            ) from e
+        except urllib.error.URLError as e:
+            raise RoutePlexError(
+                message=f"Connection failed: {e.reason}",
+                code="connection_error",
+            ) from e
+
+        try:
+            for raw_line in resp:
+                line = raw_line.decode("utf-8", errors="replace").strip()
+                if line == "data: [DONE]":
+                    return
+                data = parse_sse_line(line)
+                if data is None:
+                    continue
+
+                event_type = data.get("type", "")
+
+                if event_type == "start":
+                    yield StreamEvent(type="start", raw=data)
+
+                elif event_type == "delta":
+                    yield StreamEvent(
+                        type="delta",
+                        content=data.get("content", ""),
+                        raw=data,
+                    )
+
+                elif event_type == "done":
+                    yield StreamEvent(
+                        type="done",
+                        model_used=data.get("model_used"),
+                        provider=data.get("provider"),
+                        usage=data.get("usage"),
+                        finish_reason=data.get("finish_reason"),
+                        latency_ms=data.get("latency_ms"),
+                        raw=data,
+                    )
+
+                elif event_type == "error":
+                    yield StreamEvent(
+                        type="error",
+                        error=data.get("message", "Unknown streaming error"),
+                        raw=data,
+                    )
+        finally:
+            resp.close()
 
     # ------------------------------------------------------------------
     # Estimate (free, no auth)
@@ -231,6 +357,21 @@ class RoutePlex:
         data = self._get("/api/v1/models")
         models = []
         for m in data.get("data", []):
+            pricing_raw = m.get("pricing")
+            pricing = None
+            if pricing_raw:
+                pricing = ModelPricing(
+                    input_per_1k=pricing_raw.get("input_per_1k", 0),
+                    output_per_1k=pricing_raw.get("output_per_1k", 0),
+                )
+            caps_raw = m.get("capabilities")
+            caps = None
+            if caps_raw:
+                caps = ModelCapabilities(
+                    streaming=caps_raw.get("streaming", True),
+                    functions=caps_raw.get("functions", False),
+                    vision=caps_raw.get("vision", False),
+                )
             models.append(Model(
                 id=m.get("id", ""),
                 display_name=m.get("display_name", m.get("id", "")),
@@ -239,6 +380,11 @@ class RoutePlex:
                 context_window=m.get("context_window", 0),
                 max_output_tokens=m.get("max_output_tokens", 0),
                 health=m.get("health", "healthy"),
+                pricing=pricing,
+                capabilities=caps,
+                aliases=m.get("aliases", []),
+                deprecated=m.get("deprecated", False),
+                deprecation_date=m.get("deprecation_date"),
                 raw=m,
             ))
         return models
