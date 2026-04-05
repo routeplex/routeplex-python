@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "routeplex"
-version = "0.1.0"
+version = "1.0.0"
 description = "RoutePlex Python SDK - Multi-model AI gateway. Route requests across OpenAI, Anthropic, and Google Gemini through a unified API."
 readme = "README.md"
 license = {text = "MIT"}
@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["ai", "llm", "openai", "anthropic", "gemini", "gateway", "routing", "multi-model"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
